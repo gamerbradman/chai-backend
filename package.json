@@ -1,15 +1,16 @@
 {
   "name": "backend-project",
   "version": "1.0.0",
+  "description": "baackend project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "chair",
-    "backend"
+    "chai",
+    "backend",
+    "javacript"
   ],
   "author": "ayumonthefuturerobot",
-  "license": "ISC",
-  "description": ""
+  "license": "ISC"
 }
