@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+
 import fs from 'fs';
 
 cloudinary.config({ 
@@ -15,11 +16,12 @@ const uploadOnCloudinary= async (localfilepath)=>{
         const respone=await cloudinary.uploader.upload(localfilepath,{
             resource_type:'auto'
         })
-
+        // console.log(respone);
+        
         //the file is first stored in local server using multer and then it is uploaded to cloudinary and now needs to be removed from the local server
         
         fs.unlinkSync(localfilepath)
-        return respone;
+        return respone;      //returns a json file with all the data about the upload so its url can be accesed later and stored in the database (avatar.url)
 
     } catch (error) {
      fs.unlinkSync(localfilepath)   //remove the locally saved temporary file as the upload got failed
