@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, logoutUser, registerUser } from "../controllers/user.controllers.js";
+import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controllers/user.controllers.js";
 import { upload} from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -25,6 +25,6 @@ router.route("/login").post(loginUser)
 //secure routes
 
 router.route("/logout").post(verifyJWT,logoutUser)          //verifyJWT middleware is inserted, once it passes the next() flag then only logout user function starts
-
+router.route("/refresh-Token").post(refreshAccessToken)
 
 export default router

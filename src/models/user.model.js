@@ -39,7 +39,7 @@ const userSchema= new Schema(
             type:String,
             required:[true,'password is required']
         },
-        refreshtoken:{
+        refreshToken:{
             type:String
         }
         
@@ -51,7 +51,7 @@ userSchema.pre("save",async function(next){             //next is a flag which m
 
    this.password= await bcrypt.hash(this.password , 10)     //run 10 cycles of encryption
     next()
-})                             //arrow function cant be used as it doesnt have reference of this
+})                             //arrow function cant be used as it doesnt have reference of "this"
 
 //to create new methods
 userSchema.methods.isPasswordCorrect= async function(password){
