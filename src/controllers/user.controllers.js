@@ -6,6 +6,23 @@ import { APIresponse } from "../utils/APIresponse.js";
 
 
 
+const generateAccessAndRefreshToken=async(userId)=>{
+    try {
+        const user=await User.findById(userId)
+        const accessToken = user.generateAccessToken()
+        const refreshToken=user.generateRefreshToken()
+    
+        user.refreshToken=refreshToken
+        await user.save({validateBeforeSave:false})   //we need to save the refresh token now but we dont have other fields like passwords which are required.it would be a error so we turn of validate before save
+    
+        return {accessToken,refreshToken}
+    } catch (error) {
+        throw new APIerror(500,"something went wrong while generating access and refresh token")
+    }
+
+}
+
+
 
 
 const registerUser=asynchandler ( async (req,res) => {
@@ -83,4 +100,89 @@ const registerUser=asynchandler ( async (req,res) => {
 }
 )
 
-export {registerUser}
+
+
+const loginUser = asyncHandler(async (req, res)=>{
+    // req body -> data
+    // username or email
+    //find the user
+    //password check
+    //access and referesh token
+    //send cookie
+
+        const {email,username,password}=req.body
+        if(!username && !email){
+            throw new APIerror(400,"username or email is required")
+        }
+
+        
+        const user =await User.findOne({
+            $or:[{username},{email}]                //a mongoose property that tries to find an user with any one of these
+        })
+        if(!user){
+            throw new APIerror(404,"user doesnt exist")
+        }
+
+
+        const isPasswordValid= await user.isPasswordCorrect(password)
+        if(!isPasswordValid){
+            throw new APIerror(401,"invalid user credentials")
+        }
+
+        const {accessToken,refreshToken}=await generateAccessAndRefreshToken(user._id)
+
+        const loggedInUser=await User.findById(user._id).select("-password -refreshtoken")
+
+        const options={                 //makes the cookies only editable by browser
+            httpOnly:true,
+            secure:true
+        }
+        
+
+        return res
+        .status(200)
+        .cookie("accessToken",accessToken,options)
+        .cookie("refreshToken",refreshToken,options)
+        .json(
+            new APIresponse(
+                200,
+                {
+                    user:loggedInUser,accessToken,refreshToken   //we send in this format again for if the user wants to access these values
+                },
+                "user logged in successfully"
+            )
+        )
+        
+
+})
+
+const logoutUser=asynchandler(async(req,res)=>{
+    User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset:{
+                refreshToken:1   //this removes the field from the doc
+            }
+        },
+        {
+            new:true
+        }
+    )
+
+    const options={
+        httpOnly:true,
+        secure:true
+    }
+
+
+    return res
+    .status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json(new APIresponse(200,{},"user logged out"))
+})
+
+
+
+
+export {registerUser,loginUser,logoutUser}
