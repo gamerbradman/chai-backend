@@ -5,7 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { APIresponse } from "../utils/APIresponse.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import JWT from "jsonwebtoken"
-import { application } from "express";
+import { app } from "../app.js";
 import mongoose from "mongoose";
 
 
@@ -304,7 +304,7 @@ const updateUserAvatar= asynchandler(async(req,res)=>{
     }
 
    
-    const user= User.findByIdAndUpdate(
+    const user=await User.findByIdAndUpdate(
      req.user?._id,
      {
         $set:{
@@ -336,7 +336,7 @@ const updateCoverImage= asynchandler(async(req,res)=>{
     }
 
    
-    const user= User.findByIdAndUpdate(
+    const user=await User.findByIdAndUpdate(
      req.user?._id,
      {
         $set:{
@@ -415,13 +415,13 @@ const getUserChannelProfile = asynchandler(async(req, res) => {
     ])
 
     if (!channel?.length) {
-        throw new ApiError(404, "channel does not exists")
+        throw new APIerror(404, "channel does not exists")
     }
 
     return res
     .status(200)
     .json(
-        new ApiResponse(200, channel[0], "User channel fetched successfully")
+        new APIresponse(200, channel[0], "User channel fetched successfully")
     )
 })
 
@@ -467,7 +467,7 @@ const getUserWatchHistory=asynchandler(async(req,res)=>{
     return res
     .status(200)
     .json(
-        new ApiResponse(
+        new APIresponse(
             200,
             user[0].watchHistory,
             "watchHistory fetched successfully"
